@@ -1,0 +1,58 @@
+id: G1
+name: Breakout
+version: 1
+kind: game
+# A full playable game, not a fragment. Scoped so a competent agent can
+# finish it, while still needing physics, collision, state and UI.
+prompt: |
+  Build a complete, playable Breakout game in this Godot 4.7 project.
+
+  Requirements:
+  - A paddle at the bottom that moves left and right with the arrow keys or
+    A and D, clamped so it cannot leave the screen.
+  - A ball that launches when the player presses Space, bounces off the walls,
+    the paddle and the bricks, and whose bounce angle depends on where it hits
+    the paddle.
+  - A grid of at least 5 rows by 8 columns of bricks. A brick is destroyed when
+    the ball hits it and awards points.
+  - A score display and a lives display, both visible during play. The player
+    starts with 3 lives and loses one when the ball falls below the paddle.
+  - A Game Over state when lives reach 0, and a You Win state when every brick
+    is destroyed. Both show a message and let the player restart with R.
+
+  Work autonomously until the game is finished and runs cleanly. Do not stop to
+  ask questions and do not ask for permission - every tool is pre-approved.
+
+  Follow this loop until it holds:
+    1. Build or change the scenes and scripts with the Godot tools.
+    2. Save every scene you touched.
+    3. Run the project and read the output.
+    4. If there is any error, or the game does not behave as described, fix it
+       and run it again.
+  Repeat until the project runs with no script errors and every requirement
+  above is actually implemented. A partial game that runs is not finished, and
+  a complete game that errors is not finished either.
+
+  Also:
+  - Make main.tscn the scene that starts the game.
+  - Put each script in its own .gd file. Do not leave placeholder or TODO code.
+  - Use only built-in Godot nodes and drawing (ColorRect, Polygon2D, Label,
+    Line2D, shapes). No image or audio assets exist in this project, so do not
+    reference any external file.
+  - The game must be playable with the keyboard and mouse alone.
+checks:
+  - kind: project_loads
+  - kind: no_script_errors
+  - kind: runs_clean
+    seconds: 10
+  - kind: files_present
+    patterns: ["*.gd"]
+  - kind: nodes_present
+    scene: main.tscn
+    all_of: [Label]
+  - kind: text_in_scripts
+    any_of: ["score"]
+  - kind: text_in_scripts
+    any_of: ["lives", "life"]
+  - kind: text_in_scripts
+    any_of: ["brick", "block"]

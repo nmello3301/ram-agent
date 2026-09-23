@@ -1,0 +1,28 @@
+id: T3
+name: Add a pause menu
+version: 1
+# An edit task, not a build task: it starts from the T2 result rather than an
+# empty project, so it measures how a harness works with existing code.
+depends_on: T2
+prompt: |
+  Add a pause menu to this existing game.
+
+  Requirements:
+  - Pressing Escape pauses the game and shows a menu.
+  - The menu has at least a Resume option and a Quit option.
+  - Resume unpauses and returns to play; Quit exits the game.
+  - While paused, the game world must not keep updating.
+
+  Do not break anything that already works. Make sure the project still runs
+  without script errors.
+checks:
+  - kind: project_loads
+  - kind: no_script_errors
+  - kind: runs_clean
+    seconds: 10
+  - kind: text_in_scripts
+    any_of: ["get_tree().paused", "paused = true", "process_mode"]
+  - kind: text_in_scripts
+    any_of: ["ui_cancel", "KEY_ESCAPE", "Escape"]
+  - kind: text_anywhere
+    any_of: ["Resume", "resume"]

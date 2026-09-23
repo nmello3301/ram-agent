@@ -1,0 +1,59 @@
+id: G2
+name: Twin-stick arena
+version: 1
+kind: game
+# A full playable game, not a fragment. Scoped so a competent agent can
+# finish it, while still needing physics, collision, state and UI.
+prompt: |
+  Build a complete, playable top-down twin-stick arena survival game in this
+  Godot 4.7 project.
+
+  Requirements:
+  - A player that moves in eight directions with WASD, clamped to the arena.
+  - The player aims at the mouse cursor and fires a projectile on left click,
+    with a cooldown so firing is rate-limited.
+  - Enemies that spawn at the arena edges and move toward the player. Spawning
+    gets faster over time, so surviving longer is harder.
+  - A projectile destroys an enemy on hit and awards points. An enemy touching
+    the player costs health.
+  - Health and score are both visible on screen. The player starts with 100
+    health.
+  - When health reaches 0 the game ends, shows the final score, and lets the
+    player restart with R.
+
+  Work autonomously until the game is finished and runs cleanly. Do not stop to
+  ask questions and do not ask for permission - every tool is pre-approved.
+
+  Follow this loop until it holds:
+    1. Build or change the scenes and scripts with the Godot tools.
+    2. Save every scene you touched.
+    3. Run the project and read the output.
+    4. If there is any error, or the game does not behave as described, fix it
+       and run it again.
+  Repeat until the project runs with no script errors and every requirement
+  above is actually implemented. A partial game that runs is not finished, and
+  a complete game that errors is not finished either.
+
+  Also:
+  - Make main.tscn the scene that starts the game.
+  - Put each script in its own .gd file. Do not leave placeholder or TODO code.
+  - Use only built-in Godot nodes and drawing (ColorRect, Polygon2D, Label,
+    Line2D, shapes). No image or audio assets exist in this project, so do not
+    reference any external file.
+  - The game must be playable with the keyboard and mouse alone.
+checks:
+  - kind: project_loads
+  - kind: no_script_errors
+  - kind: runs_clean
+    seconds: 10
+  - kind: files_present
+    patterns: ["*.gd"]
+  - kind: nodes_present
+    scene: main.tscn
+    all_of: [Label]
+  - kind: text_in_scripts
+    any_of: ["health"]
+  - kind: text_in_scripts
+    any_of: ["enemy", "spawn"]
+  - kind: text_in_scripts
+    any_of: ["bullet", "projectile", "shoot"]

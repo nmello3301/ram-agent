@@ -1,0 +1,68 @@
+id: G4
+name: The Keep (3D medieval FPS)
+version: 1
+kind: game
+# A 3D first-person game, scoped to what this model can actually decode in
+# 24 h: ~300 lines is ~11 h of decode at the 0.1 tok/s measured for GLM.
+prompt: |
+  Build a complete, playable 3D first-person game in this Godot 4.7 project,
+  themed on a medieval keep. It must be finished and runnable, not a sketch.
+
+  THE GAME - "The Keep"
+  - A first-person player: WASD to move, mouse to look, Space to jump, gravity
+    and collision so you cannot walk through walls or fall through the floor.
+    Capture the mouse on start and release it with Escape.
+  - A small stone keep built entirely from primitives: a floor, four outer
+    walls, and one inner wall or arch that divides the space into a courtyard
+    and a hall. Use CSGBox3D or MeshInstance3D with BoxMesh.
+  - Lighting that reads as torchlit: a dim blue-grey ambient or directional
+    light, plus at least two warm OmniLight3D "torches" mounted on walls.
+  - Three relics placed around the keep: small glowing objects that rotate
+    slowly. Walking into one collects it and removes it from the world.
+  - A HUD Label showing "Relics: N / 3", updating as they are collected.
+  - When all three are collected, show "THE KEEP IS YOURS" on screen.
+  - R restarts the game at any time.
+
+  SCOPE - read this before you start
+  This model is slow, so every token you emit costs real time. Aim for roughly
+  250-350 lines of GDScript in total, across a small number of files. Write
+  complete files in as few tool calls as you can: prefer writing a whole file
+  in one go over many small edits. Do not write documentation, comments
+  explaining the obvious, README files, tests, or configuration you were not
+  asked for. A finished small game beats an unfinished large one.
+
+  HOW TO WORK
+  There is no Godot editor connected and no MCP server. A Godot project is
+  plain text, so author it directly:
+    - write main.tscn yourself as a .tscn text file
+    - write each script as its own .gd file
+    - godot is on PATH. Check your work with:
+        godot --headless --path . --import
+        godot --headless --path . --quit-after 120
+      and read the output for errors.
+  Use only built-in Godot nodes and primitive meshes. There are no image,
+  audio or model assets in this project, so do not reference any external file.
+
+  Work autonomously until it is done. Do not ask questions and do not ask for
+  permission. Loop: write files, run the two godot commands above, read the
+  errors, fix them, run again. Stop only when the project imports and runs with
+  no script errors and every requirement above is implemented.
+checks:
+  - kind: project_loads
+  - kind: no_script_errors
+  - kind: runs_clean
+    seconds: 10
+  - kind: files_present
+    patterns: ["*.gd"]
+  - kind: text_in_scripts
+    any_of: ["camera3d", "camera", "look"]
+  - kind: text_in_scripts
+    any_of: ["characterbody3d", "move_and_slide", "velocity"]
+  - kind: text_in_scripts
+    any_of: ["relic", "collect"]
+  - kind: text_anywhere
+    any_of: ["omnilight3d", "light"]
+  - kind: text_anywhere
+    any_of: ["csgbox3d", "boxmesh", "meshinstance3d"]
+  - kind: text_in_scripts
+    any_of: ["ui_accept", "jump", "space"]

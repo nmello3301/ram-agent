@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAM_Agent</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#128029;</text></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">RAM<span>_Agent</span></div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="run">Run</button>
+    <button class="tab" data-view="games">Games</button>
+    <button class="tab" data-view="tools">Tools</button>
+    <button class="tab" data-view="bench">Benchmark</button>
+    <button class="tab" data-view="history">History</button>
+    <button class="tab" data-view="settings">Settings</button>
+  </nav>
+  <div class="status-cluster">
+    <span class="pill" id="godot-pill" title="Godot editor connection">Godot: checking…</span>
+    <span class="pill" id="engine-pill">Engine: idle</span>
+  </div>
+</header>
+
+<!-- ------------------------------------------------------------------ RUN -->
+<main class="view active" id="view-run">
+  <section class="config">
+    <div class="field">
+      <label for="model">Model</label>
+      <select id="model"></select>
+      <div class="caps" id="model-caps"></div>
+      <div class="progress hidden" id="model-progress">
+        <div class="bar"><div class="fill" id="model-progress-fill"></div></div>
+        <div class="progress-text" id="model-progress-text"></div>
+        <button class="mini" id="cancel-download">Cancel</button>
+      </div>
+      <button class="mini" id="download-btn">Download</button>
+      <button class="mini" id="load-btn">Load</button>
+    </div>
+
+    <div class="field">
+      <label for="harness">Harness</label>
+      <select id="harness"></select>
+      <div class="caps" id="harness-caps"></div>
+    </div>
+
+    <div class="field">
+      <label for="project">Project</label>
+      <div class="row">
+        <select id="project"></select>
+        <button class="mini" id="new-project">New Godot project</button>
+      </div>
+      <div class="caps" id="godot-hint"></div>
+    </div>
+
+    <div class="field">
+      <label>Time limit</label>
+      <div class="row">
+        <label class="switch">
+          <input type="checkbox" id="limit-enabled" checked>
+          <span>on</span>
+        </label>
+        <input type="number" id="limit-value" min="1" value="10" class="num">
+        <select id="limit-unit">
+          <option value="3600" selected>hours</option>
+          <option value="60">minutes</option>
+        </select>
+      </div>
+      <div class="caps">No maximum. Default 10 h because DeepSeek V4.1 Flash
+        decodes at roughly 1 tok/s.</div>
+    </div>
+  </section>
+
+  <section class="prompt-area">
+    <div id="dropzone" class="dropzone">
+      <textarea id="prompt" rows="4"
+        placeholder="Describe the game or the change you want…"></textarea>
+      <div class="attachments" id="attachments"></div>
+    </div>
+    <div class="actions">
+      <button id="run-btn" class="primary">Run</button>
+      <button id="stop-btn" class="danger" disabled>Stop</button>
+      <label class="attach-label" id="attach-label">
+        <input type="file" id="attach" accept="image/*" multiple hidden>
+        Attach image
+      </label>
+      <span class="countdown" id="countdown"></span>
+    </div>
+  </section>
+
+  <!-- Shown when a run hits its limit: nothing is discarded, the user decides. -->
+  <section class="decision hidden" id="decision">
+    <div class="decision-text">
+      <strong>Time limit reached.</strong>
+      <span id="decision-detail">Everything produced so far has been saved.</span>
+    </div>
+    <div class="row">
+      <input type="number" id="extend-value" min="1" value="1" class="num">
+      <select id="extend-unit">
+        <option value="3600" selected>hours</option>
+        <option value="60">minutes</option>
+      </select>
+      <button class="primary" id="continue-btn">Continue</button>
+      <button class="danger" id="finish-btn">Stop and keep output</button>
+    </div>
+  </section>
+
+  <section class="metrics" id="metrics">
+    <div class="metric"><span>Phase</span><b id="m-phase">idle</b></div>
+    <div class="metric"><span>TTFT</span><b id="m-ttft">–</b></div>
+    <div class="metric"><span>First tool call</span><b id="m-ttft-tool">–</b></div>
+    <div class="metric"><span>Prefill tok/s</span><b id="m-prefill">–</b></div>
+    <div class="metric"><span>Decode tok/s</span><b id="m-decode">–</b></div>
+    <div class="metric"><span>Tokens in/out</span><b id="m-tokens">0 / 0</b></div>
+    <div class="metric"><span>Tool calls</span><b id="m-tools">0</b></div>
+    <div class="metric"><span>Elapsed</span><b id="m-elapsed">0s</b></div>
+  </section>
+
+  <section class="output">
+    <div class="out-tabs">
+      <button class="out-tab active" data-pane="transcript">Transcript</button>
+      <button class="out-tab" data-pane="stderr">Harness stderr</button>
+      <button class="out-tab" data-pane="engine">Engine log</button>
+    </div>
+    <div class="pane active" id="pane-transcript"></div>
+    <pre class="pane" id="pane-stderr"></pre>
+    <pre class="pane" id="pane-engine"></pre>
+  </section>
+  <section class="catalog-widget">
+    <details id="catalog" open>
+      <summary>
+        <span class="lineup-title">Model catalogue</span>
+        <span class="lineup-sub" id="catalog-sub">loading…</span>
+      </summary>
+      <div class="catalog-bar">
+        <span class="caps" id="catalog-hw"></span>
+        <button class="mini" id="catalog-refresh" title="Re-read the models directory">
+          Refresh
+        </button>
+        <span class="caps" id="catalog-refresh-note"></span>
+      </div>
+      <div id="catalog-body"></div>
+      <div id="catalog-detail" class="catalog-detail hidden"></div>
+    </details>
+  </section>
+  <section class="lineup-widget">
+    <details id="lineup">
+      <summary>
+        <span class="lineup-title">Models that do not fit</span>
+        <span class="lineup-sub" id="lineup-sub">loading…</span>
+      </summary>
+      <div id="lineup-body"></div>
+    </details>
+  </section>
+</main>
+
+<!-- ---------------------------------------------------------------- GAMES -->
+<main class="view" id="view-games">
+  <div class="actions">
+    <button class="mini" id="refresh-games">Refresh</button>
+    <span class="caps" id="games-watcher"></span>
+  </div>
+  <div id="games-list"></div>
+</main>
+
+<!-- ---------------------------------------------------------------- TOOLS -->
+<main class="view" id="view-tools">
+  <section class="tools-summary" id="tools-summary"></section>
+  <div class="actions">
+    <button class="primary" id="save-tools">Save toolsets</button>
+    <button class="mini" id="tools-minimal">Minimal (scene_edit, scripts)</button>
+    <button class="mini" id="tools-default">Recommended default</button>
+    <span id="tools-note" class="caps"></span>
+  </div>
+  <section class="field">
+    <label>Always on</label>
+    <div class="caps" id="tools-always"></div>
+  </section>
+  <section id="tools-list"></section>
+</main>
+
+<!-- ------------------------------------------------------------ BENCHMARK -->
+<main class="view" id="view-bench">
+  <section class="config">
+    <div class="field">
+      <label>Models</label>
+      <div id="bench-models" class="checks"></div>
+    </div>
+    <div class="field">
+      <label>Harnesses</label>
+      <div id="bench-harnesses" class="checks"></div>
+    </div>
+    <div class="field">
+      <label>Tasks</label>
+      <div id="bench-tasks" class="checks"></div>
+    </div>
+  </section>
+  <div class="actions">
+    <button class="primary" id="bench-run">Run matrix</button>
+    <span class="caps">Uses the current time limit. Each cell starts from a
+      fresh copy of the template project.</span>
+  </div>
+  <div id="bench-results" class="table-wrap"></div>
+</main>
+
+<!-- -------------------------------------------------------------- HISTORY -->
+<main class="view" id="view-history">
+  <div class="actions">
+    <button class="mini" id="refresh-history">Refresh</button>
+    <a class="mini" href="/api/runs.csv" download>Export CSV</a>
+  </div>
+  <div id="history-table" class="table-wrap"></div>
+</main>
+
+<!-- ------------------------------------------------------------- SETTINGS -->
+<main class="view" id="view-settings">
+  <section class="settings-grid">
+    <div class="field">
+      <label>Default time limit</label>
+      <div class="row">
+        <label class="switch">
+          <input type="checkbox" id="s-limit-enabled"><span>on</span>
+        </label>
+        <input type="number" id="s-limit-value" min="1" class="num">
+        <select id="s-limit-unit">
+          <option value="3600">hours</option>
+          <option value="60">minutes</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Keep the machine awake during runs</label>
+      <label class="switch">
+        <input type="checkbox" id="s-inhibit"><span>inhibit idle and sleep</span>
+      </label>
+      <div class="caps">Blocks idle, suspend and the lid switch, and pauses
+        hypridle, for the duration of a run only.</div>
+    </div>
+    <div class="field">
+      <label>Godot MCP toolsets</label>
+      <div class="caps" id="s-toolsets-summary">—</div>
+      <div class="caps">Every tool schema is prefill, and prefill dominates the
+        cost here. Browse and change them in the
+        <a href="#" id="goto-tools">Tools</a> tab.</div>
+    </div>
+    <div class="field">
+      <label>Hugging Face token</label>
+      <div id="s-token" class="caps"></div>
+      <div class="caps">Set <code>HF_TOKEN</code> in <code>app/.env</code>.
+        Never displayed or logged.</div>
+    </div>
+    <div class="field">
+      <label>Per-model engine flags</label>
+      <div id="s-flags"></div>
+    </div>
+  </section>
+  <div class="actions"><button class="primary" id="save-settings">Save</button>
+    <span id="save-note" class="caps"></span></div>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+
+# The addon is fetched by scripts/install-godot.sh, not committed.
+templates/addons/
+
+# Benchmark scratch projects
+bench/results/

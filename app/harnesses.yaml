@@ -1,0 +1,97 @@
+# Harness registry.
+#
+# Requirements each harness has to meet (from the brief):
+#   (1) custom OpenAI- or Anthropic-compatible base URL
+#   (2) load MCP servers
+#   (3) non-interactive run, streamed output, all approvals disabled
+#
+# Protocol choice: OpenAI, not Anthropic, for every harness that offers both.
+# llama-server serves the OpenAI protocol natively and it is the one every
+# harness here speaks. Screenshots travel as content blocks on
+# /v1/chat/completions, which matters more now than it did under Colibri --
+# the default model can actually see.
+#
+# `baseline_tokens` is the measured system prompt + tool schema size with the
+# Godot toolsets enabled. It is still the most important number here, but for a
+# different reason than under Colibri: it is no longer an hour of prefill, it is
+# permanently resident context in a 64k window, re-read every turn, competing
+# with the transcript the agent needs to finish the job. Filled in by
+# scripts/measure-baselines.sh and recorded in BENCHMARKS.md.
+
+harnesses:
+  - id: direct
+    name: Direct chat
+    kind: none
+    url: null
+    version: builtin
+    mcp: false
+    tools: false
+    baseline_tokens: 0
+    notes: >
+      No harness: the prompt goes straight to llama-server. The control for every
+      other row -- it isolates raw model speed from harness overhead. It cannot
+      build a game (no tools, no file access); it exists to measure the floor.
+
+  - id: opencode
+    name: OpenCode
+    kind: cli
+    url: https://github.com/anomalyco/opencode
+    package: "opencode-ai@1.18.31"
+    version: 1.18.31
+    bin: opencode
+    mcp: true                    # native MCP support
+    tools: true
+    protocol: openai
+    # Provider config is written per run into the project dir.
+    config_file: opencode.json
+    run: ["opencode", "run", "--print-logs"]
+    approvals_disabled_by: "config: permissions all set to allow"
+    baseline_tokens: null        # measured at first run
+    notes: >
+      Repo moved from sst/opencode to anomalyco/opencode. Provider-agnostic
+      with an openai-compatible provider type, which is what llama-server exposes.
+
+  - id: goose
+    name: Goose
+    kind: cli
+    url: https://github.com/block/goose
+    release: v1.50.1
+    version: 1.50.1
+    bin: goose
+    mcp: true                    # MCP-centric; MCP servers are "extensions"
+    tools: true
+    protocol: openai
+    config_file: ~/.config/goose/config.yaml
+    run: ["goose", "run", "--no-session"]
+    approvals_disabled_by: "GOOSE_MODE=auto"
+    baseline_tokens: null
+    notes: >
+      Built around MCP, so the Godot toolset maps cleanly. Expect the largest
+      preamble of the three, which on these engines is the dominant cost.
+
+  - id: pi
+    name: Pi
+    kind: cli
+    url: https://pi.dev
+    package: "@earendil-works/pi-coding-agent@0.85.1"
+    version: 0.85.1
+    bin: pi
+    mcp: adapter                 # see below
+    tools: true
+    protocol: openai
+    run: ["pi", "-p", "--json"]  # print mode, JSON event stream
+    approvals_disabled_by: "no permission prompts by default"
+    baseline_tokens: null
+    notes: >
+      Ships NO MCP support on purpose -- pi.dev states "No MCP - build an
+      extension that adds MCP support" -- so requirement (2) is met through
+      nicobailon/pi-mcp-adapter (MIT), not by Pi itself.
+
+      ITS ORIGINAL JUSTIFICATION IS GONE. Under Colibri, Pi's sub-1,000-token
+      preamble against an MCP harness's 10-20k was worth roughly an hour of
+      prefill per turn, which made it the only harness likely to finish a game
+      at all. At 100-400 tok/s that gap is under a minute.
+
+      Kept as the control: it isolates how much of a result comes from the
+      agent loop rather than from preamble size. If OpenCode does not beat it
+      now, that is a finding about the loop, not about tokens.

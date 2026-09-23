@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Colibri Local UI
+Comment=Local game-dev agent lab: colibri engines, agent harnesses and Godot
+Exec=bash -c '"$HOME/Desktop/Colibri Local UI/app/scripts/up.sh"'
+Icon=applications-development
+Terminal=true
+Categories=Development;

@@ -1,0 +1,1167 @@
+{
+  "source": "live godot-editor-mcp 2026.9.10",
+  "always_on": [
+    {
+      "name": "core",
+      "description": "Always-on diagnostics and toolset management.",
+      "min_godot": null
+    },
+    {
+      "name": "inspection",
+      "description": "Read-only project, scene, and node inspection.",
+      "min_godot": null
+    }
+  ],
+  "baseline_tools": [
+    {
+      "name": "godot_debug_workflow",
+      "description": "Run a comprehensive debug check on the project and return a unified report.",
+      "tokens": 209
+    },
+    {
+      "name": "godot_disable_toolset",
+      "description": "Hide a toolset's tools again to keep the active tool surface small.",
+      "tokens": 64
+    },
+    {
+      "name": "godot_enable_toolset",
+      "description": "Expose a toolset's tools (e.g. \"scene_edit\") for this session. Returns the",
+      "tokens": 83
+    },
+    {
+      "name": "godot_get_server_info",
+      "description": "Return a comprehensive snapshot of the server's capabilities, toolsets,",
+      "tokens": 122
+    },
+    {
+      "name": "godot_health_check",
+      "description": "Report server version and whether the Godot editor bridge is connected.",
+      "tokens": 87
+    },
+    {
+      "name": "godot_inspection_get_active_scene",
+      "description": "Get the currently open scene's path and name. Returns ``is_open=False``",
+      "tokens": 68
+    },
+    {
+      "name": "godot_inspection_get_node_groups",
+      "description": "List the groups the node at ``node_path`` belongs to (``{groups: [name]}``),",
+      "tokens": 143
+    },
+    {
+      "name": "godot_inspection_get_node_properties",
+      "description": "Get a node's detail by scene-relative path (e.g. \"Player/Sprite2D\"):",
+      "tokens": 112
+    },
+    {
+      "name": "godot_inspection_get_node_property",
+      "description": "Read a single ``property`` by name from the node at ``node_path`` \u2014 including",
+      "tokens": 223
+    },
+    {
+      "name": "godot_inspection_get_node_property_list",
+      "description": "Return the flat list of valid property names for the node at",
+      "tokens": 101
+    },
+    {
+      "name": "godot_inspection_get_project_info",
+      "description": "Get project-level context: name, Godot version, main scene, autoloads,",
+      "tokens": 76
+    },
+    {
+      "name": "godot_inspection_get_scene_tree",
+      "description": "Get the open scene as a recursive tree of {name, type, path, script, children}.",
+      "tokens": 369
+    },
+    {
+      "name": "godot_inspection_get_selected_node",
+      "description": "Get the node currently selected in the editor \u2014 its path, type, script,",
+      "tokens": 80
+    },
+    {
+      "name": "godot_inspection_list_scenes",
+      "description": "List the project's scene files (``res://*.tscn``) and their editor state \u2014",
+      "tokens": 191
+    },
+    {
+      "name": "godot_list_tools_by_safety_class",
+      "description": "List every available tool grouped by its safety class",
+      "tokens": 90
+    },
+    {
+      "name": "godot_list_toolsets",
+      "description": "List the available toolsets (tool categories) and whether each is currently",
+      "tokens": 73
+    },
+    {
+      "name": "godot_read_resource",
+      "description": "Read a godot:// context resource by URI \u2014 the fallback for MCP clients",
+      "tokens": 106
+    },
+    {
+      "name": "godot_undo",
+      "description": "Undo the last ``count`` editor actions on the current scene's history.",
+      "tokens": 192
+    }
+  ],
+  "toolsets": [
+    {
+      "name": "scene_edit",
+      "description": "Create, modify, and delete nodes, scripts, signals, and scenes (mutating + destructive).",
+      "min_godot": "4.4",
+      "tool_count": 21,
+      "tokens": 2300,
+      "tools": [
+        {
+          "name": "godot_scene_edit_add_to_group",
+          "description": "Add the node to ``group`` (persistent \u2014 saved into the scene). Reversible.",
+          "tokens": 92
+        },
+        {
+          "name": "godot_scene_edit_attach_script",
+          "description": "Attach the existing script at ``script_path`` (a ``res://`` path) to the",
+          "tokens": 99
+        },
+        {
+          "name": "godot_scene_edit_close_scene",
+          "description": "Close a scene tab, discarding any unsaved changes.",
+          "tokens": 158
+        },
+        {
+          "name": "godot_scene_edit_connect_signal",
+          "description": "Connect ``signal_name`` on the source node to ``method_name`` on the",
+          "tokens": 129
+        },
+        {
+          "name": "godot_scene_edit_create_node",
+          "description": "Create a node of ``node_type`` named ``node_name`` under ``parent_path``",
+          "tokens": 180
+        },
+        {
+          "name": "godot_scene_edit_create_scene",
+          "description": "Create a new scene file at ``scene_path`` (``res://\u2026\u200b.tscn``) with a root",
+          "tokens": 107
+        },
+        {
+          "name": "godot_scene_edit_delete_node",
+          "description": "Delete the node at ``node_path``. Destructive: requires ``confirm=True``",
+          "tokens": 110
+        },
+        {
+          "name": "godot_scene_edit_disconnect_signal",
+          "description": "Disconnect ``signal_name`` on the source node from ``method_name`` on the",
+          "tokens": 129
+        },
+        {
+          "name": "godot_scene_edit_duplicate_node",
+          "description": "Duplicate the node at ``node_path`` (with its subtree) under the same parent.",
+          "tokens": 95
+        },
+        {
+          "name": "godot_scene_edit_instance_scene",
+          "description": "Instance a saved scene (``scene_path``, a ``res://\u2026\u200b.tscn``) as a child of",
+          "tokens": 144
+        },
+        {
+          "name": "godot_scene_edit_list_open_scenes",
+          "description": "List the currently open scenes with their modification status.",
+          "tokens": 56
+        },
+        {
+          "name": "godot_scene_edit_list_signal_connections",
+          "description": "List the outgoing signal connections from the node at ``node_path``",
+          "tokens": 81
+        },
+        {
+          "name": "godot_scene_edit_move_node",
+          "description": "Reparent the node at ``node_path`` under ``new_parent_path`` (optionally at",
+          "tokens": 126
+        },
+        {
+          "name": "godot_scene_edit_open_scene",
+          "description": "Open an existing scene file for editing.",
+          "tokens": 88
+        },
+        {
+          "name": "godot_scene_edit_reload_scene",
+          "description": "Reload the scene at ``scene_path`` from disk, discarding unsaved changes.",
+          "tokens": 104
+        },
+        {
+          "name": "godot_scene_edit_remove_from_group",
+          "description": "Remove the node from ``group``. Reversible via undo.",
+          "tokens": 86
+        },
+        {
+          "name": "godot_scene_edit_rename_node",
+          "description": "Rename the node at ``node_path`` to ``new_name``.",
+          "tokens": 85
+        },
+        {
+          "name": "godot_scene_edit_save_all_scenes",
+          "description": "Save all currently open scenes. Returns the count saved.",
+          "tokens": 66
+        },
+        {
+          "name": "godot_scene_edit_save_scene",
+          "description": "Save the currently open scene to disk, reporting the file path.",
+          "tokens": 67
+        },
+        {
+          "name": "godot_scene_edit_select_nodes",
+          "description": "Select the nodes at ``node_paths`` (scene-relative) in the editor.",
+          "tokens": 100
+        },
+        {
+          "name": "godot_scene_edit_set_node_property",
+          "description": "Set ``property`` on the node at ``node_path`` to ``value``. Godot types",
+          "tokens": 198
+        }
+      ]
+    },
+    {
+      "name": "tilemap",
+      "description": "Edit TileMap/TileMapLayer cells: set, fill rect, get, clear, list layers.",
+      "min_godot": "4.4",
+      "tool_count": 9,
+      "tokens": 1660,
+      "tools": [
+        {
+          "name": "godot_tilemap_add_tileset_atlas_source",
+          "description": "Add an atlas source (a texture sliced into a tile grid) to a TileSet, then",
+          "tokens": 254
+        },
+        {
+          "name": "godot_tilemap_clear",
+          "description": "Clear a layer's cells: for a multi-layer TileMap the given ``layer`` (default",
+          "tokens": 135
+        },
+        {
+          "name": "godot_tilemap_create_tile",
+          "description": "Create a tile at ``atlas_coords`` ``[x, y]`` in atlas ``source_id`` of a",
+          "tokens": 241
+        },
+        {
+          "name": "godot_tilemap_create_tileset",
+          "description": "Create a new TileSet resource \u2014 the prerequisite for placing real tiles with",
+          "tokens": 196
+        },
+        {
+          "name": "godot_tilemap_fill_rect",
+          "description": "Fill the rectangle ``rect`` ``[x, y, w, h]`` of cells with the same tile",
+          "tokens": 210
+        },
+        {
+          "name": "godot_tilemap_get_cell",
+          "description": "Read the tile at grid ``coords`` ``[x, y]``: returns ``source_id``,",
+          "tokens": 153
+        },
+        {
+          "name": "godot_tilemap_get_used_cells",
+          "description": "Snapshot every painted cell on the TileMap/TileMapLayer at ``node_path`` in",
+          "tokens": 164
+        },
+        {
+          "name": "godot_tilemap_layers",
+          "description": "List the layers of the TileMap/TileMapLayer at ``node_path``: each layer's",
+          "tokens": 99
+        },
+        {
+          "name": "godot_tilemap_set_cell",
+          "description": "Set the tile at grid ``coords`` ``[x, y]`` to ``source_id`` +",
+          "tokens": 208
+        }
+      ]
+    },
+    {
+      "name": "runtime",
+      "description": "Run the project headless and capture its output/errors.",
+      "min_godot": null,
+      "tool_count": 9,
+      "tokens": 1480,
+      "tools": [
+        {
+          "name": "godot_runtime_capture_game_screenshot",
+          "description": "Capture the *running game's* rendered viewport as a PNG image, so you can",
+          "tokens": 211
+        },
+        {
+          "name": "godot_runtime_find_ui_elements",
+          "description": "Locate live UI (Control) nodes in the running game, each with its path, class,",
+          "tokens": 175
+        },
+        {
+          "name": "godot_runtime_get_game_scene_tree",
+          "description": "Get the *running* game's live scene tree ({name, type, path, children}).",
+          "tokens": 171
+        },
+        {
+          "name": "godot_runtime_get_property_samples",
+          "description": "Return the time series captured by the most recent ``monitor_property``:",
+          "tokens": 92
+        },
+        {
+          "name": "godot_runtime_is_playing",
+          "description": "Report whether a play session is running and which scene.",
+          "tokens": 52
+        },
+        {
+          "name": "godot_runtime_monitor_property",
+          "description": "Start watching ``property`` on the running game's node at ``node_path`` (an",
+          "tokens": 247
+        },
+        {
+          "name": "godot_runtime_play_scene",
+          "description": "Run the game from the editor: play ``scene_path`` (a ``res://*.tscn``) or the",
+          "tokens": 266
+        },
+        {
+          "name": "godot_runtime_run_and_capture",
+          "description": "Run the project headless (optionally a specific ``scene`` like",
+          "tokens": 219
+        },
+        {
+          "name": "godot_runtime_stop_scene",
+          "description": "Stop the current editor play session.",
+          "tokens": 47
+        }
+      ]
+    },
+    {
+      "name": "scene_3d",
+      "description": "Build 3D scenes: mesh instances, cameras, lights, WorldEnvironment, and GridMap cells.",
+      "min_godot": "4.4",
+      "tool_count": 8,
+      "tokens": 1374,
+      "tools": [
+        {
+          "name": "godot_scene_3d_add_mesh_instance",
+          "description": "Add a MeshInstance3D under ``parent_path`` holding a ``mesh_type`` primitive",
+          "tokens": 177
+        },
+        {
+          "name": "godot_scene_3d_add_mesh_library_item",
+          "description": "Add an item to a MeshLibrary and return its ``item_id`` (used by",
+          "tokens": 260
+        },
+        {
+          "name": "godot_scene_3d_create_mesh_library",
+          "description": "Create a new MeshLibrary resource \u2014 the prerequisite for placing cells with",
+          "tokens": 146
+        },
+        {
+          "name": "godot_scene_3d_gridmap_get_cell",
+          "description": "Read the GridMap cell at the integer grid ``position`` ``[x, y, z]``: its",
+          "tokens": 154
+        },
+        {
+          "name": "godot_scene_3d_gridmap_set_cell",
+          "description": "Set a GridMap cell at the integer grid ``position`` ``[x, y, z]`` to mesh",
+          "tokens": 159
+        },
+        {
+          "name": "godot_scene_3d_setup_camera",
+          "description": "Add a Camera3D under ``parent_path``, optionally ``make_current``, with",
+          "tokens": 151
+        },
+        {
+          "name": "godot_scene_3d_setup_environment",
+          "description": "Add a WorldEnvironment under ``parent_path`` with a new Environment resource",
+          "tokens": 158
+        },
+        {
+          "name": "godot_scene_3d_setup_lighting",
+          "description": "Add a 3D light under ``parent_path``: ``light_type`` is one of",
+          "tokens": 169
+        }
+      ]
+    },
+    {
+      "name": "input",
+      "description": "Drive a running game: synthesize key/mouse/action input and play input sequences (needs a play session + runtime probe).",
+      "min_godot": null,
+      "tool_count": 7,
+      "tokens": 1266,
+      "tools": [
+        {
+          "name": "godot_input_get_stats",
+          "description": "Report how many synthesized input events the running game has acknowledged \u2014",
+          "tokens": 72
+        },
+        {
+          "name": "godot_input_play_sequence",
+          "description": "Play a sequence of input events in order, ``delay_ms`` apart. Each event is a",
+          "tokens": 246
+        },
+        {
+          "name": "godot_input_record",
+          "description": "Start recording the input the running game receives (key + mouse button;",
+          "tokens": 106
+        },
+        {
+          "name": "godot_input_simulate_action",
+          "description": "Press or release an input-map action (e.g. \"ui_accept\", \"jump\") on the running",
+          "tokens": 220
+        },
+        {
+          "name": "godot_input_simulate_key",
+          "description": "Send a key event to the running game. ``key`` is a Godot key name",
+          "tokens": 307
+        },
+        {
+          "name": "godot_input_simulate_mouse",
+          "description": "Send a mouse event at viewport position (``x``, ``y``). With ``button`` empty,",
+          "tokens": 217
+        },
+        {
+          "name": "godot_input_stop_recording",
+          "description": "Stop recording and return the captured ``events`` (in the",
+          "tokens": 98
+        }
+      ]
+    },
+    {
+      "name": "animation",
+      "description": "Author animations (tracks/keyframes) and AnimationTree state machines/blend trees.",
+      "min_godot": null,
+      "tool_count": 8,
+      "tokens": 1157,
+      "tools": [
+        {
+          "name": "godot_animation_add_state_machine_state",
+          "description": "Add a state ``state_name`` (playing ``animation`` if given) to the",
+          "tokens": 119
+        },
+        {
+          "name": "godot_animation_add_track",
+          "description": "Add a track to ``animation`` targeting ``track_path`` (e.g.",
+          "tokens": 149
+        },
+        {
+          "name": "godot_animation_create",
+          "description": "Create an empty animation ``name`` (seconds ``length``) in the",
+          "tokens": 114
+        },
+        {
+          "name": "godot_animation_create_tree",
+          "description": "Create an AnimationTree under ``parent_path`` with a ``root_type`` root",
+          "tokens": 156
+        },
+        {
+          "name": "godot_animation_get",
+          "description": "Read an animation on the AnimationPlayer at ``node_path``: its ``length`` and",
+          "tokens": 163
+        },
+        {
+          "name": "godot_animation_insert_keyframe",
+          "description": "Insert a keyframe on ``track`` at ``time`` with ``value`` (Godot string",
+          "tokens": 227
+        },
+        {
+          "name": "godot_animation_list_animations",
+          "description": "List the animation names on the AnimationPlayer at ``node_path``. Pair with",
+          "tokens": 106
+        },
+        {
+          "name": "godot_animation_set_blend_tree_node",
+          "description": "Add an AnimationNode (``node_type``, e.g. AnimationNodeAnimation) named",
+          "tokens": 123
+        }
+      ]
+    },
+    {
+      "name": "debugger",
+      "description": "Debugger breakpoint control: set, remove, clear breakpoints and force breaks in a running game (needs a play session).",
+      "min_godot": null,
+      "tool_count": 11,
+      "tokens": 1068,
+      "tools": [
+        {
+          "name": "godot_debugger_clear_breakpoints",
+          "description": "Clear every breakpoint in the current debug session (editor + game side).",
+          "tokens": 58
+        },
+        {
+          "name": "godot_debugger_continue_execution",
+          "description": "Resume GDScript execution after a breakpoint or forced break.",
+          "tokens": 62
+        },
+        {
+          "name": "godot_debugger_evaluate_expression",
+          "description": "Evaluate a GDScript expression in the context of the given ``frame``.",
+          "tokens": 105
+        },
+        {
+          "name": "godot_debugger_force_break",
+          "description": "Trigger an immediate break in the running game via the runtime probe.",
+          "tokens": 241
+        },
+        {
+          "name": "godot_debugger_get_frame_variables",
+          "description": "Get local, member, and global variables for ``frame``.",
+          "tokens": 89
+        },
+        {
+          "name": "godot_debugger_get_stack_frames",
+          "description": "Get the current GDScript call stack while the game is paused.",
+          "tokens": 73
+        },
+        {
+          "name": "godot_debugger_remove_breakpoint",
+          "description": "Remove a previously-set breakpoint at ``line`` in ``path``.",
+          "tokens": 72
+        },
+        {
+          "name": "godot_debugger_set_breakpoint",
+          "description": "Set a breakpoint at ``line`` in ``path`` (a ``res://`` script path).",
+          "tokens": 167
+        },
+        {
+          "name": "godot_debugger_step_into",
+          "description": "Step into the next line of GDScript execution. The game must be paused",
+          "tokens": 67
+        },
+        {
+          "name": "godot_debugger_step_out",
+          "description": "Step out of the current function, pausing at the caller's next line",
+          "tokens": 67
+        },
+        {
+          "name": "godot_debugger_step_over",
+          "description": "Step over the next line of GDScript execution, treating function calls",
+          "tokens": 67
+        }
+      ]
+    },
+    {
+      "name": "testing",
+      "description": "Automated play-testing: run scenarios, assert live node state, diff screenshots, and fuzz with random input.",
+      "min_godot": null,
+      "tool_count": 5,
+      "tokens": 963,
+      "tools": [
+        {
+          "name": "godot_testing_assert_node_state",
+          "description": "Assert that a *running* game node's ``property`` satisfies ``op`` vs ``expected``",
+          "tokens": 151
+        },
+        {
+          "name": "godot_testing_compare_screenshots",
+          "description": "Visually diff two base64 PNG screenshots (e.g. from ``capture_editor_screenshot``",
+          "tokens": 135
+        },
+        {
+          "name": "godot_testing_run_stress_test",
+          "description": "Fuzz the *running* game with ``iterations`` random input events drawn from",
+          "tokens": 190
+        },
+        {
+          "name": "godot_testing_run_test_scenario",
+          "description": "Run a play-test: play ``scene`` (or the main scene), wait ``setup_ms`` for the",
+          "tokens": 254
+        },
+        {
+          "name": "godot_testing_run_tests",
+          "description": "Run the project's GDScript test suite (GUT) headlessly and return a",
+          "tokens": 233
+        }
+      ]
+    },
+    {
+      "name": "composite",
+      "description": "Macro tools that collapse multi-step scene edits into one atomic, single-undo round-trip (compose a node with script/children, batch-create nodes, apply many edits at once). Individual scene_edit tools still work.",
+      "min_godot": null,
+      "tool_count": 4,
+      "tokens": 910,
+      "tools": [
+        {
+          "name": "godot_composite_apply_node_edits",
+          "description": "Apply per-node property edits across existing nodes in one UndoRedo",
+          "tokens": 143
+        },
+        {
+          "name": "godot_composite_batch_create_nodes",
+          "description": "Create many ``node_type`` nodes named by ``names`` under ``parent_path``,",
+          "tokens": 180
+        },
+        {
+          "name": "godot_composite_compose_node",
+          "description": "Create a fully-configured node in one atomic step: a ``node_type`` named",
+          "tokens": 291
+        },
+        {
+          "name": "godot_composite_run_commands",
+          "description": "Execute a sequence of bridge commands in ONE round-trip (the addon runs",
+          "tokens": 296
+        }
+      ]
+    },
+    {
+      "name": "analysis",
+      "description": "Static project analysis: unused resources, signal flow, circular script dependencies, and scene-complexity stats.",
+      "min_godot": null,
+      "tool_count": 9,
+      "tokens": 889,
+      "tools": [
+        {
+          "name": "godot_analysis_analyze_dependencies",
+          "description": "Parse a resource file and extract all ``res://`` / ``uid://`` references.",
+          "tokens": 111
+        },
+        {
+          "name": "godot_analysis_analyze_signal_flow",
+          "description": "Map signal connections declared in scene files (``[connection ...]``): each",
+          "tokens": 99
+        },
+        {
+          "name": "godot_analysis_cross_scene_find_refs",
+          "description": "Scan all project files for references to ``target_path``. Returns which",
+          "tokens": 81
+        },
+        {
+          "name": "godot_analysis_detect_circular_dependencies",
+          "description": "Detect cycles in the script dependency graph (``preload``/``load``/``extends``",
+          "tokens": 82
+        },
+        {
+          "name": "godot_analysis_find_orphaned_resources",
+          "description": "Find resource files not referenced by any project file, excluding entry points",
+          "tokens": 124
+        },
+        {
+          "name": "godot_analysis_find_unused_resources",
+          "description": "Find resource files not referenced by any project file (and not an entry point",
+          "tokens": 94
+        },
+        {
+          "name": "godot_analysis_project_stats",
+          "description": "Project complexity stats: scene/script/resource counts, total nodes, signal",
+          "tokens": 78
+        },
+        {
+          "name": "godot_analysis_project_structure",
+          "description": "The project's raw inventory: all scene, script, and resource ``res://`` paths",
+          "tokens": 115
+        },
+        {
+          "name": "godot_analysis_validate_scene_integrity",
+          "description": "Check a scene file for broken ``ext_resource`` paths, missing",
+          "tokens": 105
+        }
+      ]
+    },
+    {
+      "name": "visual_shader",
+      "description": "Create and edit Visual Shader node graphs: create shaders, add nodes, wire connections, and set node parameters.",
+      "min_godot": null,
+      "tool_count": 6,
+      "tokens": 874,
+      "tools": [
+        {
+          "name": "godot_visual_shader_add_node",
+          "description": "Add a node of ``node_type`` (e.g. ``\"VisualShaderNodeColorConstant\"``)",
+          "tokens": 160
+        },
+        {
+          "name": "godot_visual_shader_connect_nodes",
+          "description": "Connect output port ``from_port`` on ``from_node`` to input port",
+          "tokens": 142
+        },
+        {
+          "name": "godot_visual_shader_create",
+          "description": "Create a VisualShader resource with the given ``name`` and ``type``",
+          "tokens": 133
+        },
+        {
+          "name": "godot_visual_shader_list_node_types",
+          "description": "Return the built-in VisualShader node types available in the",
+          "tokens": 68
+        },
+        {
+          "name": "godot_visual_shader_read",
+          "description": "Read the VisualShader graph at ``shader_path`` (a ``res://*.tres``): its",
+          "tokens": 158
+        },
+        {
+          "name": "godot_visual_shader_set_node_param",
+          "description": "Set ``property`` on the node identified by ``node_id`` in the",
+          "tokens": 213
+        }
+      ]
+    },
+    {
+      "name": "audio",
+      "description": "Set up audio: stream players, audio bus layout, and bus effects.",
+      "min_godot": null,
+      "tool_count": 6,
+      "tokens": 848,
+      "tools": [
+        {
+          "name": "godot_audio_add_bus",
+          "description": "Add an audio bus named ``name`` (must be unique) at ``volume_db`` to the",
+          "tokens": 124
+        },
+        {
+          "name": "godot_audio_add_bus_effect",
+          "description": "Append an AudioEffect (``effect_type``, e.g. AudioEffectReverb /",
+          "tokens": 153
+        },
+        {
+          "name": "godot_audio_add_player",
+          "description": "Add an audio player (AudioStreamPlayer / AudioStreamPlayer2D /",
+          "tokens": 192
+        },
+        {
+          "name": "godot_audio_get_bus_layout",
+          "description": "Return the current AudioServer bus layout: each bus's index, name,",
+          "tokens": 92
+        },
+        {
+          "name": "godot_audio_remove_bus",
+          "description": "Remove the audio bus named ``bus`` from the AudioServer layout \u2014 the inverse of",
+          "tokens": 133
+        },
+        {
+          "name": "godot_audio_remove_bus_effect",
+          "description": "Remove the effect at ``effect_index`` from the bus named ``bus`` \u2014 the inverse",
+          "tokens": 154
+        }
+      ]
+    },
+    {
+      "name": "physics",
+      "description": "Configure physics bodies, collision shapes, layers/masks, and raycasts.",
+      "min_godot": null,
+      "tool_count": 4,
+      "tokens": 834,
+      "tools": [
+        {
+          "name": "godot_physics_add_raycast",
+          "description": "Add a raycast node (RayCast2D/3D) named ``name`` under ``parent_path``, with",
+          "tokens": 148
+        },
+        {
+          "name": "godot_physics_set_layers",
+          "description": "Set the collision layer and/or mask on the body/area at ``node_path`` from",
+          "tokens": 153
+        },
+        {
+          "name": "godot_physics_setup_body",
+          "description": "Set physics properties (e.g. mass, gravity_scale) on the body/area at",
+          "tokens": 155
+        },
+        {
+          "name": "godot_physics_setup_collision",
+          "description": "Add a collision shape under the body/area at ``node_path``: creates a",
+          "tokens": 378
+        }
+      ]
+    },
+    {
+      "name": "input_map",
+      "description": "Edit the project's Input Map actions and events (add/remove/clear).",
+      "min_godot": "4.4",
+      "tool_count": 5,
+      "tokens": 826,
+      "tools": [
+        {
+          "name": "godot_input_map_add_action",
+          "description": "Add a new input action to the project Input Map.",
+          "tokens": 119
+        },
+        {
+          "name": "godot_input_map_add_event",
+          "description": "Add an input event to an existing input action.",
+          "tokens": 318
+        },
+        {
+          "name": "godot_input_map_clear_action_events",
+          "description": "Remove all events from an input action, leaving the action itself intact.",
+          "tokens": 104
+        },
+        {
+          "name": "godot_input_map_get_action_events",
+          "description": "Read an input action's ``deadzone`` and full event list. Each event is a dict",
+          "tokens": 184
+        },
+        {
+          "name": "godot_input_map_remove_action",
+          "description": "Remove an input action (and all its events) from the project Input Map.",
+          "tokens": 101
+        }
+      ]
+    },
+    {
+      "name": "project",
+      "description": "Explore the filesystem, search files, read/write project settings, resolve UIDs.",
+      "min_godot": null,
+      "tool_count": 6,
+      "tokens": 815,
+      "tools": [
+        {
+          "name": "godot_project_delete_resource_file",
+          "description": "Delete the ``res://`` file at ``path`` (and its ``.uid`` sidecar). The inverse",
+          "tokens": 212
+        },
+        {
+          "name": "godot_project_get_filesystem_tree",
+          "description": "Get the project's file tree under ``directory`` ({name, path, type, children}).",
+          "tokens": 126
+        },
+        {
+          "name": "godot_project_get_setting",
+          "description": "Read a project setting by name (e.g. \"application/config/name\").",
+          "tokens": 78
+        },
+        {
+          "name": "godot_project_resolve_uid",
+          "description": "Resolve between a resource path and its UID. Pass a ``uid://\u2026`` string to get",
+          "tokens": 81
+        },
+        {
+          "name": "godot_project_search_files",
+          "description": "Search ``directory`` recursively for files matching ``name_glob`` (e.g.",
+          "tokens": 138
+        },
+        {
+          "name": "godot_project_set_setting",
+          "description": "Set a project setting and persist it. Coerced to the setting's existing type",
+          "tokens": 180
+        }
+      ]
+    },
+    {
+      "name": "batch",
+      "description": "Operate over many nodes/scenes: find by type, batch-set a property, cross-scene edits, and dependency analysis.",
+      "min_godot": null,
+      "tool_count": 4,
+      "tokens": 814,
+      "tools": [
+        {
+          "name": "godot_batch_cross_scene_set_property",
+          "description": "Set ``property`` to ``value`` on every ``node_type`` node across the given",
+          "tokens": 258
+        },
+        {
+          "name": "godot_batch_find_nodes_by_type",
+          "description": "Find nodes in the open scene whose class is (or derives from) ``node_type``",
+          "tokens": 209
+        },
+        {
+          "name": "godot_batch_get_dependencies",
+          "description": "List the resources the resource/scene at ``path`` (a ``res://`` file) depends on",
+          "tokens": 89
+        },
+        {
+          "name": "godot_batch_set_property",
+          "description": "Set ``property`` to ``value`` on many nodes in the open scene, in one undoable",
+          "tokens": 258
+        }
+      ]
+    },
+    {
+      "name": "particles",
+      "description": "Create/configure GPU particle systems: process material, color gradients, and VFX presets.",
+      "min_godot": null,
+      "tool_count": 5,
+      "tokens": 784,
+      "tools": [
+        {
+          "name": "godot_particles_apply_preset",
+          "description": "Apply a generic VFX preset to the particle node at ``node_path`` \u2014 one of",
+          "tokens": 127
+        },
+        {
+          "name": "godot_particles_create",
+          "description": "Add a GPU particle node (GPUParticles2D / GPUParticles3D) under",
+          "tokens": 205
+        },
+        {
+          "name": "godot_particles_get_material",
+          "description": "Read the ProcessMaterial of the GPUParticles2D/3D at ``node_path``: its",
+          "tokens": 141
+        },
+        {
+          "name": "godot_particles_set_color_gradient",
+          "description": "Set the color-over-lifetime ramp on the particle node's process material:",
+          "tokens": 174
+        },
+        {
+          "name": "godot_particles_set_material",
+          "description": "Configure the ParticleProcessMaterial of the particle node at ``node_path``",
+          "tokens": 137
+        }
+      ]
+    },
+    {
+      "name": "theme_ui",
+      "description": "Create themes and override colors, font sizes, and styleboxes on Control nodes.",
+      "min_godot": null,
+      "tool_count": 5,
+      "tokens": 738,
+      "tools": [
+        {
+          "name": "godot_theme_ui_create",
+          "description": "Create a new Theme and assign it to the Control at ``node_path``. If",
+          "tokens": 124
+        },
+        {
+          "name": "godot_theme_ui_get_node_overrides",
+          "description": "Read the per-node theme overrides on the Control at ``node_path``: ``colors``",
+          "tokens": 186
+        },
+        {
+          "name": "godot_theme_ui_set_color",
+          "description": "Override a theme color ``name`` (e.g. \"font_color\", \"font_color_hover\") on the",
+          "tokens": 132
+        },
+        {
+          "name": "godot_theme_ui_set_font_size",
+          "description": "Override a theme font size ``name`` (e.g. \"font_size\") to ``size`` pixels on",
+          "tokens": 108
+        },
+        {
+          "name": "godot_theme_ui_set_stylebox",
+          "description": "Override a theme stylebox ``name`` (e.g. \"panel\", \"normal\") on the Control at",
+          "tokens": 188
+        }
+      ]
+    },
+    {
+      "name": "navigation",
+      "description": "Author navigation: regions, agents, navmesh baking, and navigation layers.",
+      "min_godot": null,
+      "tool_count": 5,
+      "tokens": 727,
+      "tools": [
+        {
+          "name": "godot_navigation_bake_mesh",
+          "description": "Bake the navigation mesh/polygon for the NavigationRegion2D/3D at",
+          "tokens": 115
+        },
+        {
+          "name": "godot_navigation_get_region",
+          "description": "Read back the baked navigation polygon/mesh for the NavigationRegion2D/3D at",
+          "tokens": 141
+        },
+        {
+          "name": "godot_navigation_set_layers",
+          "description": "Set the navigation-layer bitmask on the region/agent at ``node_path`` from",
+          "tokens": 128
+        },
+        {
+          "name": "godot_navigation_setup_agent",
+          "description": "Add a NavigationAgent2D/3D under ``parent_path`` configured with",
+          "tokens": 167
+        },
+        {
+          "name": "godot_navigation_setup_region",
+          "description": "Add a NavigationRegion2D/3D under ``parent_path`` with an empty navmesh",
+          "tokens": 176
+        }
+      ]
+    },
+    {
+      "name": "shader",
+      "description": "Author shaders: create/read shader files, assign ShaderMaterial, set shader parameters.",
+      "min_godot": null,
+      "tool_count": 5,
+      "tokens": 708,
+      "tools": [
+        {
+          "name": "godot_shader_assign_material",
+          "description": "Create a ShaderMaterial wrapping the shader at ``shader_path`` and assign it to",
+          "tokens": 131
+        },
+        {
+          "name": "godot_shader_create",
+          "description": "Create or overwrite a ``.gdshader`` file at ``shader_path`` (must be",
+          "tokens": 144
+        },
+        {
+          "name": "godot_shader_get_param",
+          "description": "Read the live value of shader uniform ``name`` on the node's",
+          "tokens": 109
+        },
+        {
+          "name": "godot_shader_read",
+          "description": "Read the GLSL-like source of the ``.gdshader`` file at ``shader_path``.",
+          "tokens": 81
+        },
+        {
+          "name": "godot_shader_set_param",
+          "description": "Set the shader uniform ``name`` to ``value`` on the node's ShaderMaterial.",
+          "tokens": 243
+        }
+      ]
+    },
+    {
+      "name": "asset_import",
+      "description": "Import external assets (local files or URLs) into the project and assemble PBR materials from textures.",
+      "min_godot": null,
+      "tool_count": 3,
+      "tokens": 672,
+      "tools": [
+        {
+          "name": "godot_asset_import_asset",
+          "description": "Bring an external file into the Godot project.",
+          "tokens": 314
+        },
+        {
+          "name": "godot_asset_import_create_material_from_textures",
+          "description": "Assemble a PBR material from texture paths and save it as a ``.tres``.",
+          "tokens": 195
+        },
+        {
+          "name": "godot_asset_import_get_status",
+          "description": "Check whether ``target_path`` has been imported by the Godot editor.",
+          "tokens": 163
+        }
+      ]
+    },
+    {
+      "name": "scripts",
+      "description": "Read, write, and patch GDScript files; check for parse errors.",
+      "min_godot": null,
+      "tool_count": 6,
+      "tokens": 635,
+      "tools": [
+        {
+          "name": "godot_scripts_get_for_node",
+          "description": "Get the script attached to a node (by scene-relative ``node_path``, or the",
+          "tokens": 88
+        },
+        {
+          "name": "godot_scripts_get_parse_errors",
+          "description": "Parse-check ``script_path`` and return structured errors (message + line),",
+          "tokens": 89
+        },
+        {
+          "name": "godot_scripts_list",
+          "description": "List all ``.gd`` files under ``directory`` (recursive, ``res://`` path).",
+          "tokens": 143
+        },
+        {
+          "name": "godot_scripts_patch",
+          "description": "Replace every occurrence of ``find`` with ``replace`` in the script.",
+          "tokens": 117
+        },
+        {
+          "name": "godot_scripts_read",
+          "description": "Read the full text of the GDScript at ``script_path`` (a ``res://`` path).",
+          "tokens": 67
+        },
+        {
+          "name": "godot_scripts_write",
+          "description": "Create or overwrite the GDScript at ``script_path`` with ``content``.",
+          "tokens": 131
+        }
+      ]
+    },
+    {
+      "name": "resources_edit",
+      "description": "Read/create/edit resource (.tres) files and register autoloads.",
+      "min_godot": null,
+      "tool_count": 5,
+      "tokens": 599,
+      "tools": [
+        {
+          "name": "godot_resources_edit_create_resource",
+          "description": "Create a resource of ``type`` at ``resource_path`` (``.tres``/``.res``), setting",
+          "tokens": 141
+        },
+        {
+          "name": "godot_resources_edit_read_resource_file",
+          "description": "Read a resource file (`.tres`/`.res`): its type, attached script, and",
+          "tokens": 91
+        },
+        {
+          "name": "godot_resources_edit_register_autoload",
+          "description": "Register an autoload singleton ``name`` pointing at the script/scene ``path``",
+          "tokens": 99
+        },
+        {
+          "name": "godot_resources_edit_set_resource_property",
+          "description": "Set a property on the resource file at ``resource_path`` and re-save it.",
+          "tokens": 190
+        },
+        {
+          "name": "godot_resources_edit_unregister_autoload",
+          "description": "Remove the autoload singleton ``name`` from project settings.",
+          "tokens": 78
+        }
+      ]
+    },
+    {
+      "name": "profiling",
+      "description": "Read Godot performance monitors (FPS, draw calls, memory, physics) for the editor or a running game.",
+      "min_godot": null,
+      "tool_count": 2,
+      "tokens": 360,
+      "tools": [
+        {
+          "name": "godot_profiling_get_editor_performance",
+          "description": "Read the editor process's Performance monitors (fps, process_time, memory_static,",
+          "tokens": 157
+        },
+        {
+          "name": "godot_profiling_get_performance_monitors",
+          "description": "Read the *running* game's Performance monitors (same metrics, live) via the",
+          "tokens": 203
+        }
+      ]
+    },
+    {
+      "name": "export",
+      "description": "Drive the export pipeline: list presets, report export info, and run an export (needs export templates).",
+      "min_godot": null,
+      "tool_count": 3,
+      "tokens": 321,
+      "tools": [
+        {
+          "name": "godot_export_get_info",
+          "description": "Summarize export configuration: whether ``export_presets.cfg`` exists, the",
+          "tokens": 73
+        },
+        {
+          "name": "godot_export_list_presets",
+          "description": "List the project's export presets (from ``export_presets.cfg``): each preset's",
+          "tokens": 75
+        },
+        {
+          "name": "godot_export_project",
+          "description": "Export the project with the named ``preset`` to ``output_path`` (relative paths",
+          "tokens": 173
+        }
+      ]
+    },
+    {
+      "name": "project_scaffold",
+      "description": "Generate a project skeleton (directories, settings, autoloads, root scene) for common game types so agents start from a known structure.",
+      "min_godot": null,
+      "tool_count": 1,
+      "tokens": 178,
+      "tools": [
+        {
+          "name": "godot_project_scaffold",
+          "description": "Scaffold a project skeleton for ``type``.",
+          "tokens": 178
+        }
+      ]
+    },
+    {
+      "name": "editor",
+      "description": "Capture editor screenshots (image content for vision-capable clients).",
+      "min_godot": null,
+      "tool_count": 1,
+      "tokens": 130,
+      "tools": [
+        {
+          "name": "godot_editor_capture_screenshot",
+          "description": "Capture the Godot editor's main viewport and return it as a PNG image, so",
+          "tokens": 130
+        }
+      ]
+    }
+  ]
+}

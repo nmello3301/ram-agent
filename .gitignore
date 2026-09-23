@@ -1,0 +1,30 @@
+# Weights. 27 GB and up, fetched by scripts/download-models.sh.
+/models/*
+!/models/.gitkeep
+
+# Run state: engine logs, venvs, the native llama.cpp build, harness HOME.
+/state/*
+!/state/.gitkeep
+
+# Agent output: Godot projects and Blender working files.
+/projects/*
+!/projects/.gitkeep
+/assets/*
+!/assets/.gitkeep
+
+# Secrets
+.env
+app/.env
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+
+# The Godot MCP addon is fetched by scripts/install-godot.sh, not committed.
+app/templates/addons/
+
+# Benchmark scratch
+app/bench/results/

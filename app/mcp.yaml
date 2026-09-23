@@ -1,0 +1,145 @@
+# MCP server registry.
+#
+# Under Colibri there was exactly one MCP server and its invocation was
+# hardcoded in harness.py. RAM_Agent has two, they are mutually exclusive in
+# normal use, and their tool catalogues differ by an order of magnitude -- so
+# they belong in a registry with their costs written down.
+#
+# THE NUMBER THAT MATTERS is `tokens`. Tool schemas are resident context, not
+# just prefill. At 64k of context, turning on Blender's `full` profile spends
+# roughly half the window before the agent has read a single file.
+#
+# PROVENANCE, because it differs per field and that matters:
+#   godot.*      - MEASURED on this machine against godot-editor-mcp 2026.9.10
+#                  (see Colibri BENCHMARKS.md, "the Godot MCP tool catalogue").
+#   blender.*    - tool COUNTS are from the upstream v3/v4 release notes.
+#                  Token costs are ESTIMATED at the ~125 tok/tool rate the
+#                  Godot catalogue actually measured, and are marked so.
+#   command/env  - NOT YET VERIFIED against an installed server. These are the
+#                  documented shapes; confirm with scripts/probe-mcp.sh before
+#                  quoting any run that used them. Marked `verified: false`.
+
+servers:
+
+  godot:
+    name: Godot MCP
+    package: godot-editor-mcp
+    version: "2026.9.10"
+    phases: [godot, both]
+    verified: true
+    command: ["godot-editor-mcp"]
+    transport: stdio
+    # The addon dials OUT to this; the server binds it. Host networking means
+    # the container's 127.0.0.1 and the editor's are the same interface.
+    bridge_url: "ws://127.0.0.1:9080"
+    env_map:
+      toolsets: GODOT_MCP_DEFAULT_TOOLSETS
+      bridge: GODOT_MCP_BRIDGE_URL
+      project: GODOT_MCP_PROJECT
+    # Always exposed; cannot be switched off and must not be listed as opt-in.
+    always_on: [core, inspection]
+    always_on_tools: 18
+    always_on_tokens: 2557
+    toolsets:
+      scene_edit:   {tools: 21, tokens: 2498, vision: false}
+      scripts:      {tools: 6,  tokens: 690,  vision: false}
+      runtime:      {tools: 9,  tokens: 1566, vision: false}
+      debugger:     {tools: 11, tokens: 1171, vision: false}
+      screenshots:  {tools: 2,  tokens: 260,  vision: true}
+    notes: >
+      54 tools / ~7,312 tokens at the default three toolsets. `debugger` is off
+      because it duplicates what is already reachable: `runtime` captures the
+      project's output and errors, and `scripts` reports parse errors.
+      `screenshots` is dropped automatically when the loaded model has no
+      vision path.
+
+  blender:
+    name: Blender MCP
+    package: blender-mcp-server
+    version: "0.1.3"
+    source: https://github.com/djeada/blender-mcp-server
+    revision: 7eed33ed
+    license: MIT
+    phases: [blender, both]
+    verified: true            # probed on this machine, 2026-09-22
+    command: ["blender-mcp-server"]
+    transport: stdio
+    # The add-on inside Blender LISTENS on this; the MCP server dials out to
+    # it. Exactly the same shape as the Godot bridge, which is why the app can
+    # treat the two alike.
+    bridge_url: "tcp://127.0.0.1:9876"
+    env_map:
+      blender_bin: BLENDER_BIN
+    # The ONLY environment variable this server reads. There are no CLI flags,
+    # no profiles and no tool gating -- verified against the source, not the
+    # README.
+    always_on_tools: 27
+    always_on_tokens: 3183
+    namespaces:
+      blender_scene:    {tools: 2, tokens: 163}
+      blender_object:   {tools: 8, tokens: 826}
+      blender_material: {tools: 5, tokens: 427}
+      blender_render:   {tools: 2, tokens: 531}
+      blender_export:   {tools: 3, tokens: 212}
+      blender_history:  {tools: 2, tokens: 99}
+      blender_python:   {tools: 2, tokens: 671}
+      blender_job:      {tools: 3, tokens: 253}
+    notes: >
+      MEASURED, not estimated: 27 tools in 8 namespaces, 12,733 bytes of
+      OpenAI function-tool schema, ~3,183 tokens. That is 5% of a 64k window
+      for the entire catalogue, so there is nothing to gate and the server
+      offers no gating anyway.
+
+      This corrects an earlier estimate in this file. It had been sized from
+      the release notes of a different, much larger community server (404
+      tools in v3, 556 in v4) with profiles and progressive disclosure. That
+      server is not what `pip install blender-mcp-server` gives you. The
+      profile machinery was fiction and has been removed rather than left to
+      mislead.
+
+      TRANSPORT: `blender_render_still`, `blender_render_animation` and
+      `blender_python_exec` take a `transport` argument. `bridge` (the
+      default) drives the live GUI session through the add-on. `headless`
+      spawns a separate `blender -b` process against a .blend file. The
+      headless path matters here for a reason that has nothing to do with
+      speed: it does not need the interactive session, so it is the way to
+      render without fighting llama.cpp for the card.
+
+      SAFETY: `blender_python_exec` executes model-generated Python inside
+      Blender with no sandbox. Treat anything it can reach as untrusted.
+    install: scripts/install-blender.sh
+    requires:
+      - "mcp<2"               # the package targets MCP SDK v1; 2.x renamed FastMCP
+      - "Blender 5.x with the 'Blender MCP Bridge' add-on enabled"
+
+# How much of the context window the tool catalogue costs, for the
+# combinations worth running. Recomputed by scripts/probe-mcp.sh against the
+# real servers; these are the registry's own arithmetic over measured numbers.
+budgets:
+  - phase: godot
+    config: "godot: scene_edit + scripts + runtime"
+    tools: 54
+    tokens: 7312
+    of_64k: "11%"
+  - phase: blender
+    config: "blender: full catalogue (there is nothing to gate)"
+    tools: 27
+    tokens: 3183
+    of_64k: "5%"
+  - phase: both
+    config: "godot default + blender"
+    tools: 81
+    tokens: 10495
+    of_64k: "16%"
+
+# A note on why the phase split survives this correction.
+#
+# It was justified on the assumption that Blender MCP was 404-556 tools and
+# would blow the window on its own. That turned out to be wrong: both servers
+# together are 16% of 64k, which is affordable.
+#
+# The split is kept anyway, for the reason that actually holds up: an agent
+# given 81 tools across two unrelated applications has a harder selection
+# problem than one given 54 or 27, and the asset phase genuinely completes
+# before the integration phase begins. It is now a DEFAULT rather than a
+# hard constraint -- `both` is a supported configuration, not a trap.

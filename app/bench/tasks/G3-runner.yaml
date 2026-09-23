@@ -1,0 +1,59 @@
+id: G3
+name: Endless runner
+version: 1
+kind: game
+# A full playable game, not a fragment. Scoped so a competent agent can
+# finish it, while still needing physics, collision, state and UI.
+prompt: |
+  Build a complete, playable side-scrolling endless runner in this Godot 4.7
+  project.
+
+  Requirements:
+  - A character that runs automatically to the right at a constant speed, with
+    gravity pulling it down onto the ground.
+  - Space or the up arrow jumps. The player may double-jump, but only twice
+    before landing again.
+  - Obstacles generated procedurally ahead of the player and freed once they
+    are off screen behind it, so the game can run indefinitely.
+  - Every obstacle must be passable: each gap has to be clearable by a jump.
+  - A distance or time score that increases while running and is visible on
+    screen.
+  - Hitting an obstacle ends the run, shows the final score, and lets the
+    player restart with R.
+
+  Work autonomously until the game is finished and runs cleanly. Do not stop to
+  ask questions and do not ask for permission - every tool is pre-approved.
+
+  Follow this loop until it holds:
+    1. Build or change the scenes and scripts with the Godot tools.
+    2. Save every scene you touched.
+    3. Run the project and read the output.
+    4. If there is any error, or the game does not behave as described, fix it
+       and run it again.
+  Repeat until the project runs with no script errors and every requirement
+  above is actually implemented. A partial game that runs is not finished, and
+  a complete game that errors is not finished either.
+
+  Also:
+  - Make main.tscn the scene that starts the game.
+  - Put each script in its own .gd file. Do not leave placeholder or TODO code.
+  - Use only built-in Godot nodes and drawing (ColorRect, Polygon2D, Label,
+    Line2D, shapes). No image or audio assets exist in this project, so do not
+    reference any external file.
+  - The game must be playable with the keyboard and mouse alone.
+checks:
+  - kind: project_loads
+  - kind: no_script_errors
+  - kind: runs_clean
+    seconds: 10
+  - kind: files_present
+    patterns: ["*.gd"]
+  - kind: nodes_present
+    scene: main.tscn
+    all_of: [Label]
+  - kind: text_in_scripts
+    any_of: ["jump"]
+  - kind: text_in_scripts
+    any_of: ["obstacle", "spawn"]
+  - kind: text_in_scripts
+    any_of: ["score", "distance"]

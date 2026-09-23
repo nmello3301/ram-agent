@@ -1,0 +1,26 @@
+id: T4
+name: Visual fix (vision models only)
+version: 1
+# Skipped and recorded as N/A for text-only engines. Of the three models here
+# Under Colibri this task was nearly unrunnable: the only engine fast enough to
+# reach it was text-only, and the two with vision ran at 0.1-1 tok/s. The
+# default model here has vision, so this is a real measurement now;
+# DeepSeek V4 Flash does not.
+requires_vision: true
+fixture: fixtures/broken-hud.png
+prompt: |
+  The attached screenshot shows this game's HUD rendering incorrectly: the
+  score label and the health bar overlap each other in the top-left corner,
+  and part of the text is cut off at the screen edge.
+
+  Fix the HUD layout so that nothing overlaps and nothing is clipped. Keep
+  both elements visible and legible. Make sure the project still runs without
+  script errors.
+checks:
+  - kind: project_loads
+  - kind: no_script_errors
+  - kind: runs_clean
+    seconds: 10
+  - kind: text_anywhere
+    # An anchor/offset/margin change is what a real fix touches.
+    any_of: ["anchor", "offset_", "position", "MarginContainer", "VBoxContainer"]

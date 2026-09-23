@@ -1,0 +1,102 @@
+# RAM_Agent.
+#
+#   scripts/up.sh          (wraps this with the right UID/GID and paths)
+#
+# One container. The backend runs llama-server and the harnesses as child
+# processes rather than orchestrating sibling containers, so there is no Docker
+# socket mounted and nothing here can start another container.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # CUDA 13.3 to match the host driver. Do NOT drop to 13.2: Qwen3.6
+        # produces gibberish on that version.
+        CUDA_ARCH: "${CUDA_ARCH:-86}"
+        LLAMA_REF: "${LLAMA_REF:-b11115}"
+    image: ram-agent:latest
+    container_name: ram-agent
+
+    # Host networking: the in-container MCP servers have to reach the Godot
+    # editor addon and the Blender bridge listening on the host's localhost.
+    # uvicorn itself binds 127.0.0.1 (see the Dockerfile CMD), so nothing is
+    # exposed off-box.
+    network_mode: host
+
+    # Run as the invoking user so files written into projects/ are owned by
+    # them and the host Godot editor can open and edit them.
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+
+    volumes:
+      # Read-only. This is a real change from Colibri, where models/ had to be
+      # writable because colibri wrote .coli_kv and .coli_ssd sidecars next to
+      # the weights. llama.cpp writes nothing there, so the weights can be
+      # mounted read-only and an agent with shell access cannot corrupt a
+      # 27 GB download.
+      - "${RAM_AGENT_ROOT}/models:/models:ro"
+      - "${RAM_AGENT_ROOT}/projects:/projects"
+      # Blender working files and exported glTF, shared between the asset phase
+      # and the integration phase.
+      - "${RAM_AGENT_ROOT}/assets:/assets"
+      - "${RAM_AGENT_ROOT}/state:/state"
+      # The HF token, when set. Read-only, never logged.
+      - "${RAM_AGENT_ROOT}/app/.env:/app/.env:ro"
+
+    environment:
+      MODELS_DIR: /models
+      PROJECTS_DIR: /projects
+      ASSETS_DIR: /assets
+      STATE_DIR: /state
+      LLAMA_HOME: /opt/llama.cpp
+      LLAMA_SERVER_BIN: /opt/llama.cpp/bin/llama-server
+      GODOT_BIN: /opt/godot/godot
+
+      HF_HOME: /state/hf
+      HF_XET_HIGH_PERFORMANCE: "1"
+
+    env_file:
+      - path: .env
+        required: false
+
+    # GPU, for the attention/shared trunk and the KV cache. Every model here
+    # uses it; --n-cpu-moe decides how much of the rest follows.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+    ulimits:
+      # --mlock pins the whole model. Without an unlimited memlock ceiling the
+      # pin fails and llama.cpp silently falls back to pageable memory, which
+      # is the failure this project exists to avoid.
+      memlock: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+
+    # No cpu/memory limits. The model is sized by the quantisation in
+    # models.yaml, not by a cgroup, and capping RAM here would only push a
+    # resident model back onto the disk.
+
+    shm_size: "2gb"
+
+    # The healthcheck must never be the thing that restarts a running
+    # benchmark. start_period is shorter than Colibri's 300 s because loading
+    # is now a sequential read into page cache rather than a cold expert
+    # warm-up -- but it is still generous, because --mlock on 27 GB is not free.
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8088/api/health',timeout=10)"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+
+    restart: "no"
+    stdin_open: true
+    tty: true

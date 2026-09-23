@@ -1,0 +1,39 @@
+id: T1
+name: Pong
+version: 1
+# Fixed and versioned: changing a prompt changes the benchmark, so the version
+# is bumped instead and old results keep their own version number.
+prompt: |
+  Create a complete Pong game in this Godot 4.7 project.
+
+  Requirements:
+  - Two paddles. The left one is controlled with W and S, the right one with
+    the Up and Down arrow keys.
+  - A ball that starts moving when the game begins and bounces off the paddles
+    and the top and bottom walls.
+  - Scoring: when the ball leaves the left or right edge, the other player
+    scores a point and the ball resets to the centre.
+  - The score for both players is visible on screen at all times.
+  - Pressing R restarts the game with the score reset to 0-0.
+
+  Make the main scene the one that runs the game, and make sure the project
+  runs without script errors.
+timeout_note: uses the current time limit setting
+checks:
+  - kind: project_loads
+  - kind: no_script_errors
+  - kind: runs_clean
+    seconds: 10
+  - kind: nodes_present
+    scene: main.tscn
+    # Node2D is excluded on purpose: the starting template is a Node2D, so
+    # including it would let an untouched project pass this check.
+    any_of: [CharacterBody2D, StaticBody2D, Area2D, RigidBody2D]
+    all_of: [Label]
+  - kind: files_present
+    patterns: ["*.gd"]
+  - kind: text_in_scripts
+    # Scoring and a restart key are the two things most often skipped.
+    any_of: ["score", "Score"]
+  - kind: text_in_scripts
+    any_of: ["ui_up", "W", "KEY_W", "up"]

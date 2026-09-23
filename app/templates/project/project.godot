@@ -1,0 +1,19 @@
+; Minimal Godot 4.7 project used as the starting point for every benchmark run.
+; Deliberately almost empty: anything here that a task asks for would be scored
+; as the model's work when it was ours.
+
+config_version=5
+
+[application]
+
+config/name="RAM_Agent Bench Template"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_mcp/plugin.cfg")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"

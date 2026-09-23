@@ -1,0 +1,297 @@
+# Model registry — RAM_Agent.
+#
+# Every model here is chosen to be RESIDENT IN RAM. That is the whole premise:
+# once the weights never leave memory, decode speed is set by RAM bandwidth and
+# active-parameter count, not by the drive. See RAM_AGENT.md.
+#
+# Filenames, byte sizes and revisions below were read from the Hugging Face API
+# on 2026-09-22, not copied from prose. Re-verify with scripts/update.sh before
+# trusting a size in a benchmark.
+#
+# THE BUDGET IS RAM + VRAM. This machine has 62 GB of RAM and 6 GB of VRAM:
+# 68 GB of fast memory, of which ~55 GB is usable once headroom for the OS, the
+# editors and the CUDA context is deducted. Weights placed on the GPU come out
+# of the VRAM column and the rest sit in RAM, so a model is sized against the
+# SUM. What is not in the budget is the disk -- the moment weights page off the
+# NVMe, this is Colibri again.
+#
+# Sizing rule of thumb:
+#   decode tok/s  ~=  RAM bandwidth (27-35 GB/s)  /  (file_size_gb * active/total)
+# so for a 35B-A3B, active fraction is 3/35 and halving the quant roughly
+# doubles decode. Fitting is necessary but not sufficient: a model that fits
+# and reads 3 GB per token is still slow. Do not reflexively pick Q8.
+#
+# THIS FILE IS THE ONLY PLACE THAT KNOWS ABOUT ANY PARTICULAR MODEL.
+# No code imports a model name, a family or a prompt convention. To add any
+# GGUF: give it a repo, a revision, a filename, a size, its capability flags
+# and -- if it needs them -- `chat_template_kwargs` and `sampling`. The engine
+# passes those through without interpreting them.
+
+engine: llamacpp
+
+# Pin the llama.cpp build. A benchmark whose engine moved under it is not a
+# benchmark. Bump in BOTH places: here and the ARG in the Dockerfile.
+llamacpp_ref: b11115
+
+defaults:
+  # 64k is chosen to hold a full MCP preamble plus a long agent transcript
+  # without context-shifting mid-run. Qwen3.6 is native 262k; the limit here is
+  # KV RAM, not the model.
+  ctx: 65536
+
+  # -ncmoe: how many layers' expert FFNs are pushed to CPU RAM. `auto` lets the
+  # engine adapter size it from free VRAM at load time (see backend/engine.py).
+  # An integer pins it, which is what the sweep does.
+  n_cpu_moe: auto
+
+  # Halves KV footprint against f16 for no measurable quality cost at this
+  # scale, which is what buys 64k of context on a 6 GB card.
+  cache_type_k: q8_0
+  cache_type_v: q8_0
+  flash_attn: "on"
+
+  # Physical cores, not logical. SMT generally hurts llama.cpp's CPU MoE
+  # kernels; 8 vs 16 is measurement #2b in RAM_AGENT.md.
+  threads: 8
+
+  # Bigger batches are how a small GPU still wins at prefill: the expert
+  # weights stream over PCIe once per batch, not once per token.
+  batch: 2048
+  ubatch: 512
+
+  # Held back from the -ncmoe calculation for activations, scratch, the CUDA
+  # context and whatever else has the card. Colibri learned this the hard way:
+  # a ComfyUI instance holding 110 MiB was enough to make tail allocations fail.
+  vram_reserve_mb: 1024
+
+  # Guarantee residency. Without this a ballooning Blender scene can evict
+  # model pages out of page cache and quietly put us back on the disk-streaming
+  # path this project exists to escape.
+  mlock: true
+  no_mmap: true
+
+models:
+  # --------------------------------------------------------------------- #
+  # The default. Everything else in this file is a comparison row.
+  # --------------------------------------------------------------------- #
+  - id: qwen36-35b-a3b-q5
+    name: Qwen3.6-35B-A3B (Q5_K_XL)
+    repo: unsloth/Qwen3.6-35B-A3B-GGUF
+    revision: a483e9e6cbd595906af30beda3187c2663a1118c
+    gguf: Qwen3.6-35B-A3B-UD-Q5_K_XL.gguf
+    mmproj: mmproj-F16.gguf
+    size_gb: 27.49              # 26.59 weights + 0.90 mmproj
+    tools: true
+    vision: true
+    gpu: true
+    context_ceiling: 262144
+    default: true
+    family: Qwen3.6
+    model_page: https://huggingface.co/Qwen/Qwen3.6-35B-A3B
+    license: Apache-2.0
+    released: 2026-04
+    params_total: 35B
+    params_active: 3B
+    reasoning: hybrid          # thinking / non-thinking, switchable
+    benchmarks:
+      SWE-bench Verified: 73.4
+      SWE-bench Pro: 49.5
+      Terminal-Bench 2.0: 51.5
+      MMLU-Pro: 85.2
+    notes: >
+      The default pick. Q5_K_XL is the quality/bandwidth knee: enough margin
+      over Q4 that malformed tool arguments stay rare, while leaving ~27 GB of
+      fast memory for the KV cache, Godot and Blender.
+    # Passed to llama-server as --chat-template-kwargs, verbatim. The engine
+    # validates that it is JSON and otherwise does not look inside it.
+    chat_template_kwargs:
+      preserve_thinking: true  # agentic loops want reasoning kept across turns
+    sampling:
+      temp: 0.6
+      top_p: 0.95
+      top_k: 20
+      min_p: 0.0
+
+  # --------------------------------------------------------------------- #
+  # Same model, self-speculative decoding. Expected to become the default
+  # once measured -- but measure first, see RAM_AGENT.md on MoE routing.
+  # --------------------------------------------------------------------- #
+  - id: qwen36-35b-a3b-q5-mtp
+    name: Qwen3.6-35B-A3B (Q5_K_XL, MTP)
+    repo: unsloth/Qwen3.6-35B-A3B-MTP-GGUF
+    revision: 5bc3e238d916f48a861bac2f8a1990a0e9b7e98d
+    gguf: Qwen3.6-35B-A3B-UD-Q5_K_XL.gguf
+    mmproj: mmproj-F16.gguf
+    size_gb: 28.06              # 27.16 weights + 0.90 mmproj
+    tools: true
+    vision: true
+    gpu: true
+    context_ceiling: 262144
+    family: Qwen3.6
+    model_page: https://huggingface.co/Qwen/Qwen3.6-35B-A3B
+    license: Apache-2.0
+    released: 2026-04
+    params_total: 35B
+    params_active: 3B
+    reasoning: hybrid
+    benchmarks:
+      SWE-bench Verified: 73.4
+      Terminal-Bench 2.0: 51.5
+    notes: >
+      Multi-token prediction heads: draft several tokens, verify them in one
+      weight read. Claimed 1.5-2x at no accuracy loss. That is the right shape
+      of win when bandwidth-bound, but MoE routing differs per token so a draft
+      can touch more experts than a single token would. The GPU-measured figure
+      is an upper bound here.
+    chat_template_kwargs:
+      preserve_thinking: true
+    sampling:
+      temp: 0.6
+      top_p: 0.95
+      top_k: 20
+      min_p: 0.0
+    spec:
+      type: draft-mtp
+      draft_n_max: 2            # sweep 1-6; do NOT assume 2 is optimal
+
+  # --------------------------------------------------------------------- #
+  # Quant sweep rows. Same weights, different bandwidth bill.
+  # --------------------------------------------------------------------- #
+  - id: qwen36-35b-a3b-q4
+    name: Qwen3.6-35B-A3B (Q4_K_XL)
+    repo: unsloth/Qwen3.6-35B-A3B-GGUF
+    revision: a483e9e6cbd595906af30beda3187c2663a1118c
+    gguf: Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf
+    mmproj: mmproj-F16.gguf
+    size_gb: 23.26
+    tools: true
+    vision: true
+    gpu: true
+    context_ceiling: 262144
+    family: Qwen3.6
+    model_page: https://huggingface.co/Qwen/Qwen3.6-35B-A3B
+    license: Apache-2.0
+    released: 2026-04
+    params_total: 35B
+    params_active: 3B
+    reasoning: hybrid
+    benchmarks:
+      SWE-bench Verified: 73.4
+      Terminal-Bench 2.0: 51.5
+    notes: >
+      The speed end of the sweep. ~20% less to read per token than Q5_K_XL.
+      Watch tool-call validity, not perplexity: quant damage shows up here as
+      malformed arguments, which a pass/fail score hides.
+    chat_template_kwargs:
+      preserve_thinking: true
+    sampling:
+      temp: 0.6
+      top_p: 0.95
+      top_k: 20
+      min_p: 0.0
+
+  - id: qwen36-35b-a3b-q8
+    name: Qwen3.6-35B-A3B (Q8_0)
+    repo: unsloth/Qwen3.6-35B-A3B-GGUF
+    revision: a483e9e6cbd595906af30beda3187c2663a1118c
+    gguf: Qwen3.6-35B-A3B-Q8_0.gguf
+    mmproj: mmproj-F16.gguf
+    size_gb: 37.80
+    tools: true
+    vision: true
+    gpu: true
+    context_ceiling: 262144
+    family: Qwen3.6
+    model_page: https://huggingface.co/Qwen/Qwen3.6-35B-A3B
+    license: Apache-2.0
+    released: 2026-04
+    params_total: 35B
+    params_active: 3B
+    reasoning: hybrid
+    benchmarks:
+      SWE-bench Verified: 73.4
+      Terminal-Bench 2.0: 51.5
+    notes: >
+      The quality ceiling for this model and the control for the quant sweep.
+      Roughly 40% slower to decode than Q5_K_XL. Run it to find out whether Q5
+      loses anything; do not run it by default.
+    chat_template_kwargs:
+      preserve_thinking: true
+    sampling:
+      temp: 0.6
+      top_p: 0.95
+      top_k: 20
+      min_p: 0.0
+
+  # --------------------------------------------------------------------- #
+  # The non-thinking fallback. Bigger, coder-specialised, no vision.
+  # --------------------------------------------------------------------- #
+  - id: qwen3-coder-next-q4
+    name: Qwen3-Coder-Next (Q4_K_S)
+    repo: unsloth/Qwen3-Coder-Next-GGUF
+    revision: ce09c67b53bc8739eef83fe67b2f5d293c270632
+    gguf: Qwen3-Coder-Next-UD-Q4_K_S.gguf
+    mmproj: null
+    size_gb: 46.08
+    tools: true
+    vision: false
+    gpu: true
+    context_ceiling: 262144
+    family: Qwen3-Coder
+    model_page: https://huggingface.co/Qwen/Qwen3-Coder-Next
+    license: Apache-2.0
+    released: 2026-02
+    params_total: 80B
+    params_active: 3B
+    reasoning: none           # no <think> blocks at all
+    benchmarks:
+      SWE-bench Verified: 70.6
+      SWE-bench Pro: 44.3
+      Terminal-Bench 2.0: 36.2
+      Aider: 66.2
+    notes: >
+      80B total / 3B active, so it decodes in the same class as the 35B despite
+      being 2x the file -- active bytes, not total bytes, set the speed. It is
+      a NON-THINKING model, which removes the reasoning-token tax inside a tool
+      loop entirely. Costs: no vision, and Terminal-Bench 36.2 vs 51.5.
+      At 46 GB of a ~55 GB usable budget it is the one row that cannot share
+      the machine with a large Blender scene.
+    sampling:
+      # Unsloth's documented sampling for this model; deliberately NOT the
+      # Qwen3.6 set, which is the point of per-model sampling.
+      temp: 1.0
+      top_p: 0.95
+      top_k: 40
+      min_p: 0.01
+
+# ---------------------------------------------------------------------------
+# Ruled out, not merely absent. Surfaced in the UI so the lineup is explicit
+# about what exists upstream and why it is not here.
+# ---------------------------------------------------------------------------
+excluded:
+  - name: Qwen3.8-Flash-Next
+    size_gb: 84.9
+    reason: >
+      125B backbone + a 51B n-gram table. Fits "in 46 GB of RAM" only because
+      the n-gram table stays paged on SSD via mmap -- which reintroduces the
+      exact disk dependency this project exists to escape, on a DRAM-less QLC
+      drive, at 6B active instead of 3B. Excluded on purpose, not overlooked.
+
+  - name: GLM-5.3-Flash
+    size_gb: 105
+    reason: >
+      320B/18B active. 105-115 GB at 2-bit, 180-195 GB at Q4. Does not fit in
+      62 GB at any quantization worth running. This is the model Colibri ran at
+      0.1 tok/s.
+
+  - name: MiniMax M3
+    size_gb: 220
+    reason: 428B MoE. Does not fit.
+
+  - name: Hy4 Preview
+    size_gb: 400
+    reason: 770B total / 49B active. Does not fit, and 49B active would be slow if it did.
+
+  - name: Kimi K3
+    size_gb: 1600
+    reason: Top open-weight agentic scores, and 1.6 TB. Not on this machine.
